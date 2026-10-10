@@ -1,0 +1,21 @@
+#!/bin/bash
+# Regenerates theme/theme.css and theme/wallpaper from the current Omarchy theme.
+# Installed as an Omarchy theme-set hook; also safe to run by hand.
+set -euo pipefail
+
+STARTPAGE_DIR="$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+CURRENT="$HOME/.local/state/omarchy/current"
+OUT="$STARTPAGE_DIR/theme"
+
+mkdir -p "$OUT"
+
+{
+  echo ":root {"
+  sed -nE 's/^[[:space:]]*([a-z_]+)[[:space:]]*=[[:space:]]*"(#[0-9a-fA-F]{6})".*/  --\1: \2;/p' "$CURRENT/theme/colors.toml"
+  echo "}"
+} >"$OUT/theme.css.tmp"
+mv "$OUT/theme.css.tmp" "$OUT/theme.css"
+
+if [[ -e $CURRENT/background ]]; then
+  cp -fL "$CURRENT/background" "$OUT/wallpaper"
+fi
